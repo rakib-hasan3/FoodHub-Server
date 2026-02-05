@@ -40,9 +40,9 @@ const getMyMeals = async (req: Request, res: Response) => {
     }
 };
 
-const getAllmeals = async (req: Request, res: Response) => {
+const getAllPublicMeals = async (req: Request, res: Response) => {
     try {
-        const result = await MealsService.getAllmeals();
+        const result = await MealsService.getAllPublicMeals();
 
         res.status(200).json({
             success: true,
@@ -55,11 +55,22 @@ const getAllmeals = async (req: Request, res: Response) => {
             message: error.message
         });
     }
+};
+
+const getSingleMeal = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await MealsService.getSingleMeal(id as string);
+
+    res.status(200).json({
+        success: true,
+        data: result
+    })
 }
 
 
 export const MealsController = {
     createMeal,
     getMyMeals,
-    getAllmeals
+    getAllPublicMeals,
+    getSingleMeal
 }

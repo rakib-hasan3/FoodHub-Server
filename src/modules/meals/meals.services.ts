@@ -52,7 +52,7 @@ const getMyMeals = async (userId: string) => {
     return meals;
 };
 
-const getAllmeals = async () => {
+const getAllPublicMeals = async () => {
     const meals = await prisma.meals.findMany({
         where: {
             status: "AVAILABLE"
@@ -70,10 +70,33 @@ const getAllmeals = async () => {
 
     })
     return meals;
+};
+
+const getSingleMeal = async (id: string) => {
+    const meal = await prisma.meals.findUnique({
+        where: { id },
+        include: {
+            provider: {
+                select: {
+                    restaurant_name: true,
+                    address: true
+                }
+            },
+            category: {
+                select: { name: true }
+            }
+
+        }
+    })
+    if (!meal) {
+        throw new Error("Meal not found");
+    }
+    return meal
 }
 
 export const MealsService = {
     createMeal,
     getMyMeals,
-    getAllmeals,
+    getAllPublicMeals,
+    getSingleMeal
 }

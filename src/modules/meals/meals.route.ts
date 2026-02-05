@@ -20,7 +20,11 @@ router.get(
 
 router.get(
     "/",
-    MealsController.getAllmeals
+    MealsController.getAllPublicMeals
 )
 
+router.get(
+    "/:id",
+    MealsController.getSingleMeal
+)
 export const MealsRoutes: Router = router;
