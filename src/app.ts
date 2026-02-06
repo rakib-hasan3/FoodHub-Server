@@ -6,6 +6,7 @@ import cors from 'cors'
 import { MealsRoutes } from "./modules/meals/meals.route";
 import { categoriesRouter } from "./modules/categories/categories.router";
 import { OrdersRoutes } from "./modules/orders/order.route";
+import { ProviderOrderRoutes } from "./modules/provider-order/providerOrder.route";
 
 const app: Application = express();
 
@@ -23,6 +24,8 @@ app.use("/api/provider", postRouter);
 app.use("/api/meals", MealsRoutes)
 app.use("/api/categories", categoriesRouter);
 app.use("/api/orders", OrdersRoutes);
+app.use("/api/provider", ProviderOrderRoutes);
+
 
 app.get("/", (req, res) => {
     res.send("Hello world !");
