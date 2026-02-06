@@ -5,6 +5,7 @@ import { auth } from "./lib/auth";
 import cors from 'cors'
 import { MealsRoutes } from "./modules/meals/meals.route";
 import { categoriesRouter } from "./modules/categories/categories.router";
+import { OrdersRoutes } from "./modules/orders/order.route";
 
 const app: Application = express();
 
@@ -21,6 +22,7 @@ app.all('/api/auth/*splat', toNodeHandler(auth));
 app.use("/api/provider", postRouter);
 app.use("/api/meals", MealsRoutes)
 app.use("/api/categories", categoriesRouter);
+app.use("/api/orders", OrdersRoutes);
 
 app.get("/", (req, res) => {
     res.send("Hello world !");
