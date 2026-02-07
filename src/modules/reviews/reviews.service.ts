@@ -63,9 +63,30 @@ const getReviewsProviderByMeal = async (mealId: string, providerId: string) => {
     return reviews;
 };
 
+const getAllReviewsbyAdmin = async () => {
+    const reviews = await prisma.reviews.findMany({
+        include: {
+            customer: { select: { name: true, email: true } },
+            meal: { select: { name: true, provider_id: true } },
+        },
+        orderBy: { created_at: "desc" },
+    });
+
+    return reviews;
+};
+
+// Optional: delete review
+const deleteReviewbyAdmin = async (reviewId: string) => {
+    return await prisma.reviews.delete({
+        where: { id: reviewId },
+    });
+};
+
 
 export const ReviewsService = {
     createReview,
     getReviewsByMeal,
-    getReviewsProviderByMeal
+    getReviewsProviderByMeal,
+    getAllReviewsbyAdmin,
+    deleteReviewbyAdmin
 };
