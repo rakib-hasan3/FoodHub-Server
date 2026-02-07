@@ -1,0 +1,34 @@
+import { Request, Response } from "express";
+import { ReviewsService } from "./reviews.service";
+
+const createReview = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user!.id; // customer must be logged in
+        const mealId = req.params.mealId;
+        const { rating, comment } = req.body;
+
+        const review = await ReviewsService.createReview(userId, mealId as string, {
+            rating,
+            comment,
+        });
+
+        res.json({ success: true, review });
+    } catch (err: any) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+};
+
+const getReviews = async (req: Request, res: Response) => {
+    try {
+        const mealId = req.params.mealId;
+        const reviews = await ReviewsService.getReviewsByMeal(mealId as string);
+        res.json({ success: true, reviews });
+    } catch (err: any) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+};
+
+export const ReviewsController = {
+    createReview,
+    getReviews,
+};

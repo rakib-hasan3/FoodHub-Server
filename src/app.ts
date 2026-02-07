@@ -7,6 +7,9 @@ import { MealsRoutes } from "./modules/meals/meals.route";
 import { categoriesRouter } from "./modules/categories/categories.router";
 import { OrdersRoutes } from "./modules/orders/order.route";
 import { ProviderOrderRoutes } from "./modules/provider-order/providerOrder.route";
+import { AdminOrdersRoutes } from "./modules/admin/adminOrders.route";
+import { adminUserRouter } from "./modules/user-management/adminUser.router";
+import { ReviewsRoutes } from "./modules/reviews/reviews.route";
 
 const app: Application = express();
 
@@ -25,7 +28,9 @@ app.use("/api/meals", MealsRoutes)
 app.use("/api/categories", categoriesRouter);
 app.use("/api/orders", OrdersRoutes);
 app.use("/api/provider", ProviderOrderRoutes);
-
+app.use("/api/admin", AdminOrdersRoutes);
+app.use("/api/reviews", ReviewsRoutes);
+// app.use("/api/admin", adminUserRouter);
 
 app.get("/", (req, res) => {
     res.send("Hello world !");
