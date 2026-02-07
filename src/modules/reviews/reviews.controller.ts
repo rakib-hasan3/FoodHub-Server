@@ -42,8 +42,32 @@ const getReviewsProviderByMeal = async (req: Request, res: Response) => {
     }
 };
 
+// Get all reviews (Admin)
+const getAllReviewsbyAdmin = async (req: Request, res: Response) => {
+    try {
+        const reviews = await ReviewsService.getAllReviewsbyAdmin();
+        res.json({ success: true, reviews });
+    } catch (err: any) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+};
+
+// Delete review (Admin)
+const deleteReviewbyAdmin = async (req: Request, res: Response) => {
+    try {
+        const reviewId = req.params.reviewId;
+        await ReviewsService.deleteReviewbyAdmin(reviewId as string);
+        res.json({ success: true, message: "Review deleted" });
+    } catch (err: any) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+};
+
+
 export const ReviewsController = {
     createReview,
     getReviews,
-    getReviewsProviderByMeal
+    getReviewsProviderByMeal,
+    deleteReviewbyAdmin,
+    getAllReviewsbyAdmin
 };
