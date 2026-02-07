@@ -41,7 +41,31 @@ const getReviewsByMeal = async (mealId: string) => {
     return reviews;
 };
 
+const getReviewsProviderByMeal = async (mealId: string, providerId: string) => {
+    // Check if this meal belongs to this provider
+    const meal = await prisma.meals.findUnique({
+        where: { id: mealId },
+        select: { provider_id: true },
+    });
+
+    if (!meal) throw new Error("Meal not found");
+    if (meal.provider_id !== providerId) throw new Error("Not authorized to view reviews");
+
+    // Get reviews for this meal
+    const reviews = await prisma.reviews.findMany({
+        where: { meal_id: mealId },
+        include: {
+            customer: { select: { name: true, email: true } },
+        },
+        orderBy: { created_at: "desc" },
+    });
+
+    return reviews;
+};
+
+
 export const ReviewsService = {
     createReview,
     getReviewsByMeal,
+    getReviewsProviderByMeal
 };
