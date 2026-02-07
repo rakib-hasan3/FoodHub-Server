@@ -19,5 +19,11 @@ router.get("/:mealId", ReviewsController.getReviews);
 router.get("/provider/reviews/:mealId", auth(UserRole.PROVIDER), ReviewsController.getReviewsProviderByMeal);
 
 
+// Admin: get all reviews
+router.get("/admin/reviews", auth(UserRole.ADMIN), ReviewsController.getAllReviewsbyAdmin);
+
+// Admin: delete review
+router.delete("/admin/reviews/:reviewId", auth(UserRole.ADMIN), ReviewsController.deleteReviewbyAdmin);
+
 
 export const ReviewsRoutes = router;
