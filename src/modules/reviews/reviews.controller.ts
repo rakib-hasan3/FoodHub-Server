@@ -28,7 +28,22 @@ const getReviews = async (req: Request, res: Response) => {
     }
 };
 
+
+const getReviewsProviderByMeal = async (req: Request, res: Response) => {
+    try {
+        const mealId = req.params.mealId;
+        const providerId = req.user!.id; // auth middleware থেকে provider id
+
+        const reviews = await ReviewsService.getReviewsProviderByMeal(mealId as string, providerId);
+
+        res.json({ success: true, reviews });
+    } catch (err: any) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+};
+
 export const ReviewsController = {
     createReview,
     getReviews,
+    getReviewsProviderByMeal
 };

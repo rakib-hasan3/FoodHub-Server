@@ -15,4 +15,9 @@ router.post(
 // Public: Get all reviews for a meal
 router.get("/:mealId", ReviewsController.getReviews);
 
+// Only provider can see reviews for their meals
+router.get("/provider/reviews/:mealId", auth(UserRole.PROVIDER), ReviewsController.getReviewsProviderByMeal);
+
+
+
 export const ReviewsRoutes = router;
