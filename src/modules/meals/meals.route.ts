@@ -7,14 +7,14 @@ import { UserRole } from "../../../generated/prisma/enums";
 const router = express.Router()
 
 router.post(
-    "/",
+    "/create",
     auth(UserRole.PROVIDER),
     MealsController.createMeal
 );
 
 router.get(
-    "/mymeals",
-    auth(UserRole.PROVIDER),
+    "/my-meals/:id",
+    // auth(UserRole.PROVIDER || UserRole.USER),
     MealsController.getMyMeals
 )
 

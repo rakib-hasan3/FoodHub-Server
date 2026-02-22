@@ -6,13 +6,13 @@ import { ProviderOrderController } from "./providerOrder.controller";
 const router = express.Router();
 
 router.get(
-    "/orders",
+    "/",
     auth(UserRole.PROVIDER),
     ProviderOrderController.getMyOrders
 );
 
 router.patch(
-    "/orders/:orderId/status",
+    "/:orderId/status",
     auth(UserRole.PROVIDER),
     ProviderOrderController.updateOrderStatus
 );

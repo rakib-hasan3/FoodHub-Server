@@ -12,7 +12,7 @@ const getProviderOrders = async (userId: string) => {
     }
 
     //   provider meals → order items → orders
-    const orders = await prisma.order_items.findMany({
+    const orderItems = await prisma.order_items.findMany({
         where: {
             meal: {
                 provider_id: provider.id
@@ -35,7 +35,7 @@ const getProviderOrders = async (userId: string) => {
         }
     });
 
-    return orders;
+    return orderItems;
 };
 
 const allowedStatusFlow: Record<string, OrderStatus[]> = {
@@ -79,6 +79,9 @@ const updateOrderStatus = async (
         (item) => item.meal.provider_id === provider.id
     );
 
+    if (order.status === OrderStatus.READY) {
+        throw new Error("Order already completed");
+    }
     if (!isProviderOrder) {
         throw new Error("You are not allowed to update this order");
     }

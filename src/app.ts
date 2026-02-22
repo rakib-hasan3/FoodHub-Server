@@ -27,10 +27,10 @@ app.use("/api/provider", postRouter);
 app.use("/api/meals", MealsRoutes)
 app.use("/api/categories", categoriesRouter);
 app.use("/api/orders", OrdersRoutes);
-app.use("/api/provider", ProviderOrderRoutes);
-app.use("/api/admin", AdminOrdersRoutes);
+app.use("/api/provider/orders", ProviderOrderRoutes);
+app.use("/api/admin/order-management", AdminOrdersRoutes);
 app.use("/api/reviews", ReviewsRoutes);
-// app.use("/api/admin", adminUserRouter);
+app.use("/api/admin/user-management", adminUserRouter);
 
 app.get("/", (req, res) => {
     res.send("Hello world !");

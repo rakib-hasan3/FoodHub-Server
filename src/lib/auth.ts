@@ -4,56 +4,56 @@ import { prisma } from "./prisma";
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // Use true for port 465, false for port 587
-    auth: {
-        user: process.env.APP_USER,
-        pass: process.env.APP_PASS,
-    },
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // Use true for port 465, false for port 587
+  auth: {
+    user: process.env.APP_USER,
+    pass: process.env.APP_PASS,
+  },
 });
 
 export const auth = betterAuth({
-    database: prismaAdapter(prisma, {
-        provider: "postgresql", // or "mysql", "postgresql", ...etc
-    }),
-    trustedOrigins: [process.env.APP_URL!],
-    user: {
-        additionalFields: {
-            role: {
-                type: "string",
-                defaultValue: "USER",
-                required: false
-            },
-            phone: {
-                type: "string",
-                required: false
-            },
-            status: {
-                type: "string",
-                defaultValue: "ACTIVE",
-                required: false
-            }
-        }
-    },
-    emailAndPassword: {
-        enabled: true,
-        autoSignIn: false,
-        requireEmailVerification: true,
+  database: prismaAdapter(prisma, {
+    provider: "postgresql", // or "mysql", "postgresql", ...etc
+  }),
+  trustedOrigins: [process.env.APP_URL!],
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        defaultValue: "USER",
+        required: false
+      },
+      phone: {
+        type: "string",
+        required: false
+      },
+      status: {
+        type: "string",
+        defaultValue: "ACTIVE",
+        required: false
+      }
+    }
+  },
+  emailAndPassword: {
+    enabled: true,
+    autoSignIn: false,
+    requireEmailVerification: true,
 
-    },
-    emailVerification: {
-        sendOnSignUp: true,
-        autoSignInAfterVerification: true,
-        sendVerificationEmail: async ({ user, url, token }, request) => {
-            try {
-                const sendVerificationUrl = `${process.env.APP_URL}/verify-email?token${token}`
-                const info = await transporter.sendMail({
-                    from: '"Foodhub" <foodhub@ph.com>',
-                    to: user.email,
-                    subject: "Please Verify Your email",
-                    text: "Hello world?", // Plain-text version of the message
-                    html: `
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url, token }, request) => {
+      try {
+        const sendVerificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
+        const info = await transporter.sendMail({
+          from: '"Foodhub" <foodhub@ph.com>',
+          to: user.email,
+          subject: "Please Verify Your email",
+          text: "Hello world?", // Plain-text version of the message
+          html: `
   <!DOCTYPE html>
   <html>
   <head>
@@ -118,13 +118,13 @@ export const auth = betterAuth({
   </body>
   </html>
   `, // HTML version of the message
-                });
+        });
 
-                console.log("Message sent:", info.messageId);
-            } catch (err) {
-                console.error(err);
-                throw err;
-            }
-        },
+        console.log("Message sent:", info.messageId);
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
     },
+  },
 });

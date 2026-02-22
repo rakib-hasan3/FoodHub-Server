@@ -15,11 +15,13 @@ datasource db {
 
 model Provider_Profile {
   id              String  @id @default(uuid())
+  is_active       Boolean @default(true)
   user_id         String  @unique
   user            User    @relation(fields: [user_id], references: [id])
   restaurant_name String  @db.VarChar(150)
   address         String  @db.VarChar(250)
   contact_number  String
+  image           String?
   meals           Meals[]
 
   @@index([user_id])

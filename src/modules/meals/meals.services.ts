@@ -33,20 +33,10 @@ const createMeal = async (userId: string, data: any) => {
     return result;
 }
 
-const getMyMeals = async (userId: string) => {
-    const provider = await prisma.provider_Profile.findUnique({
-        where: { user_id: userId }
-    });
-
-    if (!provider) {
-        throw new Error("Provider profile not found");
-    }
-
+const getMyMeals = async (providerId: string) => {
     const meals = await prisma.meals.findMany({
-        where: { provider_id: provider.id },
-        include: {
-            category: true
-        }
+        where: { provider_id: providerId },
+        include: { category: true }
     });
 
     return meals;
