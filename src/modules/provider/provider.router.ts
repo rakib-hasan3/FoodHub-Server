@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get(
     "/dashboard-stats",
-    auth(UserRole.ADMIN),
+    // auth(UserRole.ADMIN || UserRole.PROVIDER),
     ProviderController.getProviderStatsForAdmin
 );
 
@@ -27,6 +27,7 @@ router.post(
     auth(UserRole.PROVIDER),
     ProviderController.createProvider
 )
+router.get("/getmy/dashboard-stats", ProviderController.getMyDashboardStats);
 
 router.patch(
     "/update-status/:id",

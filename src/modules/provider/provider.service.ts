@@ -133,11 +133,35 @@ const getAllProviders = async () => {
         throw new Error("Error fetching providers");
     }
 };
+const getSingleProviderStats = async (providerId: string) => {
+    // ১. প্রোভাইডারের প্রোফাইল নেওয়া
+    console.log("searching for provider  id :", providerId)
+    const profile = await prisma.provider_Profile.findUnique({
+        where: { id: providerId }
+    });
+
+    // ২. ওই প্রোভাইডারের সব খাবার (Meals) নেওয়া এবং সাথে ক্যাটাগরি ইনক্লুড করা
+    const meals = await prisma.meals.findMany({
+        where: { provider_id: providerId },
+        include: {
+            category: true // যাতে খাবারের ক্যাটাগরির নাম দেখা যায়
+        }
+    });
+
+    return {
+        ...profile,
+        meals: meals.map(meal => ({
+            ...meal,
+            category: meal.category.name // ক্যাটাগরি অবজেক্ট থেকে শুধু নামটা নিয়ে আসা
+        }))
+    };
+};
 
 export const providerService = {
     createProviderProfile,
     getProviderProfile,
     getAllSystemStatsForAdmin,
     updateProviderStatus,
+    getSingleProviderStats,
     getAllProviders
 }

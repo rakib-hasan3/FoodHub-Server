@@ -113,11 +113,37 @@ const getAllProviders = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getMyDashboardStats = async (req: Request, res: Response) => {
+    try {
+        // সেশন বা টোকেন থেকে আইডি নেওয়া (আপনার মিডলওয়্যার অনুযায়ী req.user বা req.session)
+        const providerId = (req as any).user?.id || (req as any).session?.user?.id;
+
+        if (!providerId) {
+            return res.status(401).json({
+                success: false,
+                message: "আপনি লগইন করা নেই! সেশন পাওয়া যায়নি।"
+            });
+        }
+
+        console.log("সেশন থেকে পাওয়া আইডি:", providerId);
+
+        const stats = await providerService.getSingleProviderStats(providerId);
+
+        res.status(200).json({
+            success: true,
+            data: stats
+        });
+    } catch (err: any) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
 export const ProviderController = {
     createProvider,
     getProviderProfile,
     getProviderStatsForAdmin,
     updateProviderStatus,
-    getAllProviders
+    getAllProviders,
+    getMyDashboardStats
 
 }

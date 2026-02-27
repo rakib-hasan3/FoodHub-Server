@@ -2,29 +2,24 @@ import { prisma } from "../../lib/prisma";
 
 const createOrder = async (userId: string, payload: any) => {
     const { items, delivery_address } = payload;
-    /**
-     items = [
-       { meal_id: string, quantity: number }
-     ]
-    */
 
     if (!items || items.length === 0) {
         throw new Error("Order items required");
     }
 
-    let totalPrice = 0;
+    if (!delivery_address) {
+        throw new Error("Delivery address required");
+    }
 
-    // meal price 
+    let totalPrice = 0;
     const orderItemsData = [];
 
     for (const item of items) {
         const meal = await prisma.meals.findUnique({
-            where: { id: item.meal_id },
+            where: { id: item.mealId },
         });
 
-        if (!meal) {
-            throw new Error("Meal not found");
-        }
+        if (!meal) throw new Error("Meal not found");
 
         totalPrice += Number(meal.price) * item.quantity;
 
@@ -36,24 +31,19 @@ const createOrder = async (userId: string, payload: any) => {
         });
     }
 
-    // order create
+    // ✅ create order with actual delivery_address
     const order = await prisma.orders.create({
         data: {
             customer_id: userId,
-            delivery_address,
+            delivery_address: delivery_address, // 👈 make sure this is a string
             total_price: totalPrice,
-            orderItems: {
-                create: orderItemsData,
-            },
+            orderItems: { create: orderItemsData },
         },
-        include: {
-            orderItems: true,
-        },
+        include: { orderItems: true },
     });
 
     return order;
 };
-
 const getMyOrders = async (userId: string) => {
     return prisma.orders.findMany({
         where: {

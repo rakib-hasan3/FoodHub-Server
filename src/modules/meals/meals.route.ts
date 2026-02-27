@@ -13,7 +13,7 @@ router.post(
 );
 
 router.get(
-    "/my-meals/:id",
+    "/my-meals/:providerId",
     // auth(UserRole.PROVIDER || UserRole.USER),
     MealsController.getMyMeals
 )

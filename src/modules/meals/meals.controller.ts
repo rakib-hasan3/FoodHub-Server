@@ -25,8 +25,9 @@ const createMeal = async (req: Request, res: Response) => {
 const getMyMeals = async (req: Request, res: Response) => {
     try {
         const providerId = req.params.providerId;
-        const result = await MealsService.getMyMeals(providerId as string);
+        // console.log(providerId);
 
+        const result = await MealsService.getMyMeals(providerId as string);
         res.status(200).json({
             success: true,
             messege: "Meal created successfully",
