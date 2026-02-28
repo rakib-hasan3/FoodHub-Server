@@ -14,17 +14,19 @@ import { ReviewsRoutes } from "./modules/reviews/reviews.route";
 const app: Application = express();
 
 app.use(cors({
-    origin: process.env.APP_URL || "http://localhost:3000",
-    credentials: true
-}))
+    origin: [
 
+        "https://foodhub-client-gamma.vercel.app",
+    ],
+    credentials: true,
+}));
 app.use(express.json());
 
 app.all('/api/auth/*splat', toNodeHandler(auth));
 
 
 app.use("/api/provider", postRouter);
-app.use("/api/meals", MealsRoutes)
+app.use("/api/meals", MealsRoutes);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/orders", OrdersRoutes);
 app.use("/api/provider/orders", ProviderOrderRoutes);
