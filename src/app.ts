@@ -15,10 +15,14 @@ const app: Application = express();
 
 app.use(cors({
     origin: [
-
         "https://foodhub-client-gamma.vercel.app",
+        "https://foodhub-client-d3u5oqur6-rakib-hasans-projects-5ca61459.vercel.app", // নতুন এই লিঙ্কটি যোগ করুন
+        "http://localhost:3000",
+        "http://localhost:5173"
     ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
