@@ -1,7 +1,7 @@
 import express, { Router } from "express";
 import { ProviderController } from "./provider.controller";
-import auth from "../../middlewares/auth";
 import { UserRole } from "../../../generated/prisma/enums";
+import auth from "../../middlewares/auth";
 
 
 const router = express.Router();
@@ -13,7 +13,7 @@ router.get(
 );
 
 router.get(
-    "/",
+    "/getprofile",
 
     ProviderController.getProviderProfile
 )
@@ -23,7 +23,7 @@ router.get(
 )
 
 router.post(
-    "/",
+    "/create",
     auth(UserRole.PROVIDER),
     ProviderController.createProvider
 )
@@ -31,7 +31,7 @@ router.get("/getmy/dashboard-stats", ProviderController.getMyDashboardStats);
 
 router.patch(
     "/update-status/:id",
-    // auth(UserRole.ADMIN), // যদি অ্যাডমিন প্রটেকশন থাকে
+    auth(UserRole.ADMIN), // যদি অ্যাডমিন প্রটেকশন থাকে
     ProviderController.updateProviderStatus
 );
 export const postRouter: Router = router;

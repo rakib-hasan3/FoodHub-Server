@@ -96,7 +96,9 @@ var createProviderProfile = async (data, userId) => {
   const result = await prisma.provider_Profile.create({
     data: {
       ...data,
-      user_id: userId
+      user_id: userId,
+      // <-- only use user_id, DO NOT include `user` object
+      image: data.image || null
     }
   });
   return result;
@@ -248,24 +250,20 @@ var providerService = {
 
 // src/modules/provider/provider.controller.ts
 var createProvider = async (req, res) => {
-  try {
-    const user = req.user;
-    if (!user) {
-      return res.status(400).json({
-        error: "unauthorized"
-      });
-    }
-    const result = await providerService.createProviderProfile(req.body, user.id);
-    res.status(201).json(result);
-  } catch (e) {
-    let errorMessage = "Post creation failed";
-    if (e.code === "P2002") {
-      errorMessage = "Provider profile already exists for this user.";
-    }
-    res.status(400).json({
-      error: errorMessage
+  console.log("Cookies:", req.headers.cookie);
+  console.log("User:", req.user);
+  const user = req.user;
+  if (!user) {
+    return res.status(400).json({
+      error: "unauthorized",
+      message: "user not found in request"
     });
   }
+  const result = await providerService.createProviderProfile(req.body, user.id);
+  res.status(201).json({
+    success: true,
+    data: result
+  });
 };
 var getProviderProfile2 = async (req, res) => {
   try {
@@ -380,24 +378,36 @@ var transporter = nodemailer.createTransport({
     pass: process.env.APP_PASS
   }
 });
+var isProduction = process.env.NODE_ENV?.toLowerCase() === "production";
+console.log("Is it Production?", isProduction);
 var auth = betterAuth({
-  // 🔥 VERY IMPORTANT (auth route fix)
   basePath: "/api/auth",
   database: prismaAdapter(prisma, {
     provider: "postgresql"
   }),
-  // 🔥 FIXED: add both dev + prod
-  trustedOrigins: [
-    "http://localhost:3000",
-    "https://foodhub-client-gamma.vercel.app"
-  ],
-  // 🔥 COOKIE FIX (for cross-origin)
-  cookies: {
-    sameSite: "none",
-    // allow cross-site cookie
-    secure: true
-    // required when sameSite none (production https)
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60
+    }
   },
+  advanced: {
+    cookiePrefix: "better-auth",
+    useSecureCookies: process.env.NODE_ENV === "production",
+    crossSubDomainCookies: {
+      enabled: false
+    },
+    disableCSRFCheck: true,
+    defaultCookieAttributes: {
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      httpOnly: true
+    },
+    trustProxy: true
+  },
+  trustedOrigins: [
+    "https://*.vercel.app"
+  ],
   user: {
     additionalFields: {
       role: {
@@ -502,8 +512,12 @@ var auth2 = (...roles) => {
   return async (req, res, next) => {
     try {
       const session = await auth.api.getSession({
-        headers: req.headers
+        headers: { cookie: req.headers.cookie || "" }
       });
+      console.log("HEADERS \u{1F449}", req.headers);
+      console.log("COOKIE \u{1F449}", req.headers.cookie);
+      console.log("SESSION \u{1F449}", session);
+      console.log("SESSION USER \u{1F449}", session?.user);
       if (!session) {
         return res.status(401).json({
           success: false,
@@ -545,7 +559,7 @@ router.get(
   ProviderController.getProviderStatsForAdmin
 );
 router.get(
-  "/",
+  "/getprofile",
   ProviderController.getProviderProfile
 );
 router.get(
@@ -553,14 +567,15 @@ router.get(
   ProviderController.getAllProviders
 );
 router.post(
-  "/",
+  "/create",
   auth_default(UserRole.PROVIDER),
   ProviderController.createProvider
 );
 router.get("/getmy/dashboard-stats", ProviderController.getMyDashboardStats);
 router.patch(
   "/update-status/:id",
-  // auth(UserRole.ADMIN), // যদি অ্যাডমিন প্রটেকশন থাকে
+  auth_default(UserRole.ADMIN),
+  // যদি অ্যাডমিন প্রটেকশন থাকে
   ProviderController.updateProviderStatus
 );
 var postRouter = router;
@@ -1439,15 +1454,30 @@ var ReviewsRoutes = router8;
 
 // src/app.ts
 var app = express9();
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://foodhub-client-gamma.vercel.app"
-  ],
-  credentials: true
-}));
+app.set("trust proxy", true);
+var allowedOrigins = [
+  process.env.APP_URL || "http://localhost:3000",
+  process.env.PROD_APP_URL
+].filter(Boolean);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const isAllowed = allowedOrigins.includes(origin) || /^https:\/\/foodhub-client.*\.vercel\.app$/.test(origin) || /^https:\/\/.*\.vercel\.app$/.test(origin);
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    exposedHeaders: ["Set-Cookie"]
+  })
+);
 app.use(express9.json());
-app.all("/api/auth/*splat", toNodeHandler(auth));
+app.all(/\/api\/auth\/.*/, toNodeHandler(auth));
 app.use("/api/provider", postRouter);
 app.use("/api/meals", MealsRoutes);
 app.use("/api/categories", categoriesRouter);

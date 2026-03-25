@@ -13,22 +13,48 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const isProduction = process.env.NODE_ENV?.toLowerCase() === "production"
+console.log("Is it Production?", isProduction);
+
 export const auth = betterAuth({
+
   basePath: "/api/auth",
 
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
 
-  trustedOrigins: [
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
+  },
 
-    "https://foodhub-client-gamma.vercel.app",
+  advanced: {
+    cookiePrefix: "better-auth",
+
+    useSecureCookies: process.env.NODE_ENV === "production",
+
+    crossSubDomainCookies: {
+      enabled: false,
+    },
+
+    disableCSRFCheck: true,
+
+    defaultCookieAttributes: {
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      httpOnly: true,
+    },
+
+    trustProxy: true
+  },
+
+  trustedOrigins: [
+    "https://*.vercel.app"
   ],
 
-  cookies: {
-    sameSite: "none",
-    secure: true,
-  },
 
   user: {
     additionalFields: {

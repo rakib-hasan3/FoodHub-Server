@@ -28,12 +28,14 @@ const auth = (...roles: UserRole[]) => {
         try {
             //  get user sesssion
             const session = await betterAuth.api.getSession({
-                headers: req.headers as any
+                headers: { cookie: req.headers.cookie || "" }
 
             })
 
-            // console.log("SESSION 👉", session);
-            // console.log("SESSION USER 👉", session?.user);
+            console.log("HEADERS 👉", req.headers);
+            console.log("COOKIE 👉", req.headers.cookie);
+            console.log("SESSION 👉", session);
+            console.log("SESSION USER 👉", session?.user);
 
             if (!session) {
                 return res.status(401).json({

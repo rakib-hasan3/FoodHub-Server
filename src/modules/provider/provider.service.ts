@@ -2,15 +2,21 @@ import { profile } from "node:console";
 import { OrderStatus, Provider_Profile } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 
-const createProviderProfile = async (data: Provider_Profile, userId: string) => {
+const createProviderProfile = async (data: {
+    restaurant_name: string;
+    address: string;
+    contact_number: string;
+    image?: string | null;
+}, userId: string) => {
     const result = await prisma.provider_Profile.create({
         data: {
             ...data,
-            user_id: userId
-        }
-    })
+            user_id: userId,       // <-- only use user_id, DO NOT include `user` object
+            image: data.image || null,
+        },
+    });
     return result;
-}
+};
 
 const getProviderProfile = async () => {
     const Profile = await prisma.provider_Profile.findFirst();

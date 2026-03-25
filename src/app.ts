@@ -12,21 +12,43 @@ import { adminUserRouter } from "./modules/user-management/adminUser.router";
 import { ReviewsRoutes } from "./modules/reviews/reviews.route";
 
 const app: Application = express();
+app.set('trust proxy', true);
+const allowedOrigins = [
+    process.env.APP_URL || "http://localhost:3000",
+    process.env.PROD_APP_URL,
+].filter(Boolean);
 
-app.use(cors({
-    origin: [
-        "https://foodhub-client-gamma.vercel.app",
-        "https://foodhub-client-d3u5oqur6-rakib-hasans-projects-5ca61459.vercel.app", // নতুন এই লিঙ্কটি যোগ করুন
-        "http://localhost:3000",
-        "http://localhost:5173"
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(
+    cors({
+        origin: (origin, callback) => {
+
+            if (!origin) return callback(null, true);
+
+            const isAllowed =
+                allowedOrigins.includes(origin) ||
+                /^https:\/\/foodhub-client.*\.vercel\.app$/.test(origin) ||
+                /^https:\/\/.*\.vercel\.app$/.test(origin);
+
+            if (isAllowed) {
+                callback(null, true);
+            } else {
+                callback(new Error(`Origin ${origin} not allowed by CORS`));
+            }
+        },
+
+        credentials: true,
+
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+
+        allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+
+        exposedHeaders: ["Set-Cookie"],
+    })
+);
 app.use(express.json());
+app.all(/\/api\/auth\/.*/, toNodeHandler(auth));
 
-app.all('/api/auth/*splat', toNodeHandler(auth));
+
 
 
 app.use("/api/provider", postRouter);
