@@ -2,6 +2,11 @@
 
 FoodHub is a comprehensive backend server built with Node.js, Express, TypeScript, and Prisma ORM. It serves as the core infrastructure for a full-scale food ordering platform, featuring distinct functionalities and role-based access control for Customers, Providers (Restaurants), and Administrators.
 
+## 🔗 Important Links
+- **Frontend Repository (Client):** [FoodHub-Client](https://github.com/rakib-hasan3/FoodHub-Client)
+- **Live Demo (Frontend):** [foodhub-client-gamma.vercel.app](https://foodhub-client-gamma.vercel.app)
+
+
 ## 🚀 Tech Stack
 - **Framework:** Node.js, Express.js
 - **Language:** TypeScript
