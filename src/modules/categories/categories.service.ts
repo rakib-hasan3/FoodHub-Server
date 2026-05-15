@@ -1,8 +1,8 @@
 import { prisma } from "../../lib/prisma";
 
-const createCategory = async (name: string) => {
+const createCategory = async (data: { name: string; image?: string }) => {
     const result = await prisma.categories.create({
-        data: { name }
+        data
     });
     return result;
 };

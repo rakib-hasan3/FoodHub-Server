@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -49,20 +48,53 @@ enum OrderStatus {
 }
 
 model Meals {
-  id          String           @id @default(uuid())
-  provider_id String
-  provider    Provider_Profile @relation(fields: [provider_id], references: [id])
-  category_id String
-  category    Categories       @relation(fields: [category_id], references: [id])
-  name        String           @db.VarChar(100)
-  status      MealsStatus      @default(AVAILABLE)
-  description String           @db.Text
-  price       Decimal          @db.Decimal(10, 2)
-  image_url   String
-  reviews     reviews[]
-  orderItems  Order_items[]
+  id              String           @id @default(uuid())
+  
+  // এই দুটি লাইন যোগ করা হয়েছে (Foreign Keys)
+  provider_id     String           
+  category_id     String           
+
+  // রিলেশনগুলো এখানে ডিফাইন করা আছে
+  provider        Provider_Profile @relation(fields: [provider_id], references: [id])
+  category        Categories       @relation(fields: [category_id], references: [id])
+  
+  name            String           @db.VarChar(100)
+  status          MealsStatus      @default(AVAILABLE)
+  description     String           @db.Text
+  price           Decimal          @db.Decimal(10, 2)
+  image_url       String
+  rating          Float            @default(0)
+  totalReviews    Int              @default(0)
+  featured        Boolean          @default(false)
+  trending        Boolean          @default(false)
+  orderCount      Int              @default(0)
+  discountPercent Int              @default(0)
+  discountPrice   Decimal?         @db.Decimal(10, 2)
+  offerText       String?
+  offerExpiresAt  DateTime?
+  isDiscounted    Boolean          @default(false)
+  preparationTime String?
+  calories        Int?
+  spiceLevel      String?
+  servingSize     String?
+  isAvailable     Boolean          @default(true)
+  ingredients     String[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  reviews         reviews[]
+  orderItems      Order_items[]
 
   @@index([provider_id])
+  @@index([category_id])
+  @@index([featured])
+  @@index([trending])
+  @@index([isAvailable])
+  @@index([spiceLevel])
+  @@index([rating])
+  @@index([orderCount])
+  @@index([createdAt])
+  @@index([isDiscounted])
+  @@index([offerExpiresAt])
 }
 
 enum MealsStatus {
@@ -73,6 +105,7 @@ enum MealsStatus {
 model Categories {
   id    String  @id @default(uuid())
   name  String  @db.VarChar(150)
+  image String?
   meals Meals[]
 }
 
@@ -105,15 +138,14 @@ model reviews {
 }
 
 model User {
-  id              String            @id
+  id              String            @id @default(uuid())
   name            String
   email           String
+  password        String?
   emailVerified   Boolean           @default(false)
   image           String?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
-  sessions        Session[]
-  accounts        Account[]
   orderItems      Order_items[]
   reviews         reviews[]
   providerProfile Provider_Profile?
@@ -132,50 +164,5 @@ enum UserRole {
   PROVIDER
 }
 
-model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
-  @@index([userId])
-  @@map("session")
-}
 
-model Account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  @@index([userId])
-  @@map("account")
-}
-
-model Verification {
-  id         String   @id
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([identifier])
-  @@map("verification")
-}

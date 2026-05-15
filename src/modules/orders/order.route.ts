@@ -1,6 +1,6 @@
 import express from "express";
 import auth from "../../middlewares/auth";
-import { UserRole } from "../../../generated/prisma/enums";
+import { UserRole } from "@prisma/client";
 import { OrdersController } from "./order.controller";
 
 const router = express.Router();

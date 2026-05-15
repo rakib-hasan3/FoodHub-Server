@@ -4,14 +4,18 @@ import { ProviderOrderService } from "./providerOrder.service";
 const getMyOrders = async (req: Request, res: Response) => {
     try {
         const userId = req.user!.id;
+        console.log("🛒 Provider orders requested by userId:", userId);
 
         const result = await ProviderOrderService.getProviderOrders(userId);
+
+        console.log("✅ Returning", result.length, "order items");
 
         res.status(200).json({
             success: true,
             data: result
         });
     } catch (error: any) {
+        console.error("❌ Provider orders error:", error.message, error);
         res.status(400).json({
             success: false,
             message: error.message

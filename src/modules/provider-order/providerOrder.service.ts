@@ -1,11 +1,15 @@
-import { OrderStatus } from "../../../generated/prisma/enums";
+import { OrderStatus } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 
 const getProviderOrders = async (userId: string) => {
     //   provider profile
+    console.log("🔍 Looking for provider with user_id:", userId);
+    
     const provider = await prisma.provider_Profile.findUnique({
         where: { user_id: userId }
     });
+
+    console.log("📋 Provider found:", provider);
 
     if (!provider) {
         throw new Error("Provider profile not found");
@@ -16,7 +20,8 @@ const getProviderOrders = async (userId: string) => {
         where: {
             meal: {
                 provider_id: provider.id
-            }
+            },
+            ordersId: { not: null }
         },
         include: {
             orders: true,
@@ -34,6 +39,8 @@ const getProviderOrders = async (userId: string) => {
             }
         }
     });
+
+    console.log("📦 Order items found:", orderItems.length, orderItems);
 
     return orderItems;
 };

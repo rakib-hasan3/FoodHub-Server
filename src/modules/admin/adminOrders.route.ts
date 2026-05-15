@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 import { AdminOrdersController } from "./adminOrders.controller";
-import { UserRole } from "../../../generated/prisma/enums";
+import { UserRole } from "@prisma/client";
 import auth from "../../middlewares/auth";
 import { AdminUserController } from "../user-management/adminUser.controller";
 

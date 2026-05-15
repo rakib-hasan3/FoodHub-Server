@@ -1,73 +1,60 @@
-import { auth as betterAuth } from "../lib/auth";
-import { success } from "better-auth";
-import express, { NextFunction, Request, Response, Router } from "express";
-import { UserRole } from "../../generated/prisma/enums";
-
-
-
-
+import { NextFunction, Request, Response } from "express";
+import { UserRole } from "@prisma/client";
+import jwt from "jsonwebtoken";
+import AppError from "../utils/AppError";
+import { IJwtPayload } from "../modules/auth/auth.interface";
 
 declare global {
     namespace Express {
         interface Request {
-            user?: {
-                id: string;
-                email: string;
-                name: string;
-                role: string;
-                emailVerified: boolean
-
-            }
+            user?: IJwtPayload;
         }
     }
 }
 
 const auth = (...roles: UserRole[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-
         try {
-            //  get user sesssion
-            const session = await betterAuth.api.getSession({
-                headers: { cookie: req.headers.cookie || "" }
-
-            })
-
-            console.log("HEADERS 👉", req.headers);
-            console.log("COOKIE 👉", req.headers.cookie);
-            console.log("SESSION 👉", session);
-            console.log("SESSION USER 👉", session?.user);
-
-            if (!session) {
-                return res.status(401).json({
-                    success: false,
-                    message: "You are not authorised"
-                })
+            // Get token from Authorization header or cookie
+            let token = req.headers.authorization;
+            
+            if (token && token.startsWith("Bearer ")) {
+                token = token.split(" ")[1];
+            } else if (req.cookies && req.cookies.accessToken) {
+                token = req.cookies.accessToken;
             }
-            if (!session.user.emailVerified) {
-                return res.status(403).json({
-                    success: false,
-                    message: "Email verification requiered ,plz verify your email "
-                })
 
+            if (!token || token === "null" || token === "undefined") {
+                throw new AppError(401, "You are not authorized");
             }
-            req.user = {
-                id: session.user.id,
-                email: session.user.email,
-                name: session.user.name,
-                role: session.user.role as string,
-                emailVerified: session.user.emailVerified
+
+            // Verify token
+            let decoded: IJwtPayload;
+            try {
+                decoded = jwt.verify(
+                    token,
+                    process.env.JWT_ACCESS_SECRET as string
+                ) as IJwtPayload;
+            } catch (err) {
+                throw new AppError(401, "Invalid or malformed token");
             }
-            if (roles.length && !roles.includes(req.user.role as UserRole)) {
-                return res.status(403).json({
-                    success: false,
-                    message: "forbidden ! You don't have a permission to access this resourcess !"
-                })
+
+            if (!decoded) {
+                throw new AppError(401, "Invalid token");
             }
-            next()
+
+            // Role based authorization
+            if (roles.length && !roles.includes(decoded.role)) {
+                throw new AppError(403, "You don't have permission to access this resource");
+            }
+
+            // Add user to request
+            req.user = decoded;
+            next();
         } catch (err) {
             next(err);
         }
-    }
-}
+    };
+};
 
 export default auth;

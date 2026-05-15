@@ -1,76 +1,119 @@
 import { Request, Response } from "express"
-import { MealsService } from "./meals.services"
-import { success } from "better-auth";
+import { MealsValidation } from "./meals.validation"
+import { MealsService } from "./meals.services";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
 
 
-const createMeal = async (req: Request, res: Response) => {
-    try {
-        const userId = req.user!.id;
-        const result = await MealsService.createMeal(userId, req.body);
+const createMeal = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
+    const validatedData = MealsValidation.createMealSchema.parse(req.body);
+    const result = await MealsService.createMeal(userId, validatedData as any);
 
-        res.status(201).json({
-            success: true,
-            messege: "Meal created successfully ",
-            data: result
-        });
+    sendResponse(res, {
+        statusCode: 201,
+        success: true,
+        message: "Meal created successfully",
+        data: result
+    });
+});
 
-    } catch (error: any) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-}
+const updateMeal = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = req.user!.id;
+    const role = req.user!.role;
+    const validatedData = MealsValidation.updateMealSchema.parse(req.body);
+    const result = await MealsService.updateMeal(id as string, userId, role, validatedData as any);
 
-const getMyMeals = async (req: Request, res: Response) => {
-    try {
-        const providerId = req.params.providerId;
-        // console.log(providerId);
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Meal updated successfully",
+        data: result
+    });
+});
 
-        const result = await MealsService.getMyMeals(providerId as string);
-        res.status(200).json({
-            success: true,
-            messege: "Meal created successfully",
-            data: result
-        })
-    } catch (error: any) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
+const getMyMeals = catchAsync(async (req: Request, res: Response) => {
+    const providerId = req.params.providerId;
+    const result = await MealsService.getMyMeals(providerId as string);
+    
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Meals retrieved successfully",
+        data: result
+    });
+});
 
-const getAllPublicMeals = async (req: Request, res: Response) => {
-    try {
-        const result = await MealsService.getAllPublicMeals();
+const getAllPublicMeals = catchAsync(async (req: Request, res: Response) => {
+    const result = await MealsService.getAllPublicMeals(req.query);
 
-        res.status(200).json({
-            success: true,
-            message: "Meals retieved successfully ",
-            data: result
-        })
-    } catch (error: any) {
-        res.status(400).json({
-            success: false,
-            message: error.message
-        });
-    }
-};
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Meals retrieved successfully",
+        data: result
+    });
+});
 
-const getSingleMeal = async (req: Request, res: Response) => {
+const updateDiscount = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = req.user!.id;
+    const role = req.user!.role;
+    const validatedData = MealsValidation.updateDiscountSchema.parse(req.body);
+    const result = await MealsService.updateDiscount(id as string, userId, role, validatedData as any);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Discount updated successfully",
+        data: result
+    });
+});
+
+const removeDiscount = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = req.user!.id;
+    const role = req.user!.role;
+    const result = await MealsService.removeDiscount(id as string, userId, role);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Discount removed successfully",
+        data: result
+    });
+});
+
+const getDiscountedMeals = catchAsync(async (req: Request, res: Response) => {
+    const result = await MealsService.getDiscountedMeals();
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Discounted meals retrieved successfully",
+        data: result
+    });
+});
+
+const getSingleMeal = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await MealsService.getSingleMeal(id as string);
 
-    res.status(200).json({
+    sendResponse(res, {
+        statusCode: 200,
         success: true,
         data: result
-    })
-}
+    });
+});
 
 
 export const MealsController = {
     createMeal,
+    updateMeal,
+    updateDiscount,
+    removeDiscount,
+    getDiscountedMeals,
     getMyMeals,
     getAllPublicMeals,
     getSingleMeal

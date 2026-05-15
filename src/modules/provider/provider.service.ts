@@ -1,5 +1,5 @@
 import { profile } from "node:console";
-import { OrderStatus, Provider_Profile } from "../../../generated/prisma/client";
+import { OrderStatus, Provider_Profile } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 
 const createProviderProfile = async (data: {

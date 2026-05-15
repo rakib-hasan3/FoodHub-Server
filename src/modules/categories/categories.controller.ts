@@ -1,19 +1,27 @@
 import { Request, Response } from "express";
 import { CategoriesService } from "./categories.service";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
 
-const createCategory = async (req: Request, res: Response) => {
-    try {
-        const result = await CategoriesService.createCategory(req.body.name);
-        res.status(201).json({ success: true, data: result });
-    } catch (err) {
-        res.status(400).json({ success: false, message: "Category creation failed" });
-    }
-};
+const createCategory = catchAsync(async (req: Request, res: Response) => {
+    const result = await CategoriesService.createCategory(req.body);
+    sendResponse(res, {
+        statusCode: 201,
+        success: true,
+        message: "Category created successfully",
+        data: result,
+    });
+});
 
-const getCategories = async (_req: Request, res: Response) => {
+const getCategories = catchAsync(async (_req: Request, res: Response) => {
     const result = await CategoriesService.getAllCategories();
-    res.json({ success: true, data: result });
-};
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Categories retrieved successfully",
+        data: result,
+    });
+});
 
 export const CategoriesController = {
     createCategory,
